@@ -1,0 +1,33 @@
+body {
+  font-family: Arial;
+  background: #f4f4f4;
+  text-align: center;
+  padding: 20px;
+}
+
+.container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.btn {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 5px;
+  color: white;
+}
+
+.btn.blue { background-color: #007bff; }
+.btn.red { background-color: #dc3545; }
+.btn.gray { background-color: #6c757d; }
+.btn.reset { background-color: #17a2b8; }
+
+#prediction span {
+  font-size: 1.2em;
+}

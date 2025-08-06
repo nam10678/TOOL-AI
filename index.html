@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Baccarat AI Predictor</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>AI Dự Đoán Baccarat</h1>
+    <div class="input-buttons">
+      <button onclick="addResult('P')" class="btn blue">Player (P)</button>
+      <button onclick="addResult('B')" class="btn red">Banker (B)</button>
+      <button onclick="addResult('T')" class="btn gray">Tie (T)</button>
+    </div>
+
+    <div id="prediction">
+      <p><strong>Dự đoán:</strong> <span id="predicted-label">--</span></p>
+      <p><strong>Độ tin cậy:</strong> <span id="confidence">--</span>%</p>
+    </div>
+
+    <canvas id="historyChart" width="400" height="150"></canvas>
+
+    <button onclick="resetHistory()" class="btn reset">Reset</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
