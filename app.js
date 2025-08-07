@@ -1,84 +1,57 @@
-let history = [];
+let results = [];
 let model;
-let chart;
-
-const labelMap = { P: 0, B: 1, T: 2 };
-const reverseLabelMap = ['P', 'B', 'T'];
 
 async function loadModel() {
-  model = await tf.loadLayersModel('model/model.json');
-  console.log("Model loaded");
+    try {
+        model = await tf.loadLayersModel('model/model.json');
+        console.log("Model loaded.");
+    } catch (e) {
+        console.error("Failed to load model:", e);
+    }
 }
+
 loadModel();
 
 function addResult(result) {
-  history.push(result);
-  if (history.length > 100) history.shift();
-  updateChart();
-  if (history.length >= 5) predict();
-}
+    if (!model) {
+        alert("Model not loaded yet.");
+        return;
+    }
 
-function encodeInput(sequence) {
-  return sequence.map(r => {
-    const arr = [0, 0, 0];
-    arr[labelMap[r]] = 1;
-    return arr;
-  }).flat();
-}
+    results.push(result);
+    if (results.length > 5) results.shift();
 
-async function predict() {
-  const input = encodeInput(history.slice(-5));
-  const inputTensor = tf.tensor([input]);
-  const prediction = model.predict(inputTensor);
-  const data = await prediction.data();
+    if (results.length === 5) {
+        const encoded = results.map(r => {
+            if (r === 'P') return 0;
+            if (r === 'B') return 1;
+            return 2;
+        });
 
-  const maxIdx = data.indexOf(Math.max(...data));
-  const confidence = (data[maxIdx] * 100).toFixed(2);
-
-  document.getElementById('predicted-label').textContent = reverseLabelMap[maxIdx];
-  document.getElementById('confidence').textContent = confidence;
-
-  const color = maxIdx === 0 ? 'blue' : maxIdx === 1 ? 'red' : 'gray';
-  document.getElementById('predicted-label').style.color = color;
+        const input = tf.tensor2d([encoded]);
+        const prediction = model.predict(input);
+        prediction.array().then(arr => {
+            const [p, b, t] = arr[0];
+            let predicted = '';
+            let color = '';
+            if (p > b && p > t) {
+                predicted = 'Player (P)';
+                color = 'blue';
+            } else if (b > p && b > t) {
+                predicted = 'Banker (B)';
+                color = 'red';
+            } else {
+                predicted = 'Tie (T)';
+                color = 'gray';
+            }
+            document.getElementById("prediction").innerHTML =
+                `<span style="color:${color}">Dự đoán: ${predicted}</span><br>
+                Độ tin cậy: ${(Math.max(p, b, t) * 100).toFixed(2)}%`;
+        });
+    }
 }
 
 function resetHistory() {
-  history = [];
-  document.getElementById('predicted-label').textContent = "--";
-  document.getElementById('confidence').textContent = "--";
-  updateChart();
-}
-
-function updateChart() {
-  const ctx = document.getElementById('historyChart').getContext('2d');
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: history.map((_, i) => i + 1),
-      datasets: [{
-        label: 'Lịch sử',
-        data: history.map(r => labelMap[r]),
-        backgroundColor: history.map(r => r === 'P' ? 'blue' : r === 'B' ? 'red' : 'gray'),
-        borderColor: '#000',
-        borderWidth: 1,
-        pointRadius: 6
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          ticks: {
-            callback: function (val) {
-              return reverseLabelMap[val];
-            },
-            stepSize: 1,
-            min: 0,
-            max: 2
-          }
-        }
-      }
-    }
-  });
+    results = [];
+    document.getElementById("prediction").innerHTML = '';
 }
